@@ -1,69 +1,153 @@
 # Product Management Platform
 
-Aplicación fullstack para administración de productos, compuesta por backend API, frontend web y scripts de soporte.
-
-Proyecto desarrollado como portafolio técnico para demostrar experiencia en desarrollo backend con Java, arquitectura moderna, APIs REST y organización profesional tipo monorepo.
+Aplicación fullstack para administración de productos. Backend con arquitectura hexagonal en Quarkus, frontend SPA en React, despliegue en Kubernetes.
 
 ---
 
-# Vista General
+## Tecnologías
+
+### Backend
+- Java 21 · Quarkus 3.32 · Gradle
+- MongoDB (Panache) · Redis (caché)
+- MapStruct · Lombok · Bean Validation
+- SmallRye Health
+
+### Frontend
+- React 18 · TypeScript · Vite
+- Material UI · React Router
+
+### Infraestructura
+- Docker · Kubernetes (nginx Ingress + cert-manager)
+- GitHub Actions (CI/CD)
+
+---
+
+## Arquitectura del backend
 
 ```text
-product-management/
-├── product-management-api     -> Backend Java + Quarkus
-├── product-management-web     -> Frontend Web
-├── scripts                    -> Scripts de automatización / utilidades
-├── postman_collection.json    -> Colección para pruebas de API
-└── README.md
+src/main/java/com/products/
+├── adapters/
+│   ├── in/rest/          ProductResource, ApiResponse
+│   └── out/persistence/  MongoProductRepository
+├── application/
+│   ├── dto/              ProductRequest, ProductResponse, ProductsPagedResponse
+│   ├── mapper/           ProductMapper (MapStruct)
+│   └── usecase/          ProductUseCase
+├── domain/
+│   └── model/            Product, BaseEntity, PagedResponse
+├── exception/            GlobalExceptionMapper, DomainExceptionMapper,
+│                         ConstraintViolationExceptionMapper,
+│                         JsonProcessingExceptionMapper,
+│                         ProductNotFoundException, DuplicateSkuException
+└── health/               LivenessCheck, ReadinessCheck
 ```
 
 ---
 
-# Tecnologías Utilizadas
-
-## Backend
+## Requisitos previos
 
 - Java 21
-- Quarkus
-- Gradle
-- MongoDB
-- Redis
-- Lombok
-- MapStruct
-
-## Frontend
-
-- Aplicación web desacoplada del backend
-
-## Herramientas
-
-- Postman
-- Git
-- VS Code
+- Node.js ≥ 18 y pnpm ≥ 9
+- Docker Desktop (para MongoDB y Redis locales)
 
 ---
 
-# Funcionalidades Generales
+## Configuración local
 
-✅ Gestión completa de productos  
-✅ CRUD de productos  
-✅ Búsqueda por SKU  
-✅ Búsqueda por nombre  
-✅ Paginación  
-✅ Validación de datos  
-✅ Manejo global de errores  
-✅ Health Checks  
-✅ Arquitectura por capas  
-✅ Configuración por variables de entorno  
-✅ Separación frontend / backend
+Copiar y completar el archivo de variables de entorno:
+
+```bash
+cp product-management-api/.env.example product-management-api/.env
+```
+
+```env
+APP_ENVIRONMENT=local
+PORT=8080
+MONGODB_CONNECTION_STRING=mongodb://localhost:27017
+MONGODB_DATABASE=products
+REDIS_URL=redis://localhost:6379
+```
 
 ---
 
-# Modelo de Producto
+## Ejecutar en local
+
+### 1. Dependencias (Docker)
+
+```bash
+docker run -d --name mongo -p 27017:27017 mongo:7.0
+docker run -d --name redis -p 6379:6379 redis:7
+```
+
+### 2. Backend
+
+```bash
+cd product-management-api
+./gradlew quarkusDev
+```
+
+Disponible en `http://localhost:8080`
+
+### 3. Frontend
+
+```bash
+cd product-management-web
+pnpm install
+pnpm dev
+```
+
+Disponible en `http://localhost:5173` (proxy de `/api/v1` al backend configurado en `vite.config.ts`)
+
+---
+
+## Tests
+
+```bash
+cd product-management-api
+./gradlew test
+```
+
+Requiere MongoDB corriendo en `localhost:27017`. Genera reporte de cobertura en `build/jacoco-report/`.
+
+---
+
+## Endpoints
+
+### Productos
+
+| Método | Endpoint | Descripción |
+|---|---|---|
+| `POST` | `/api/v1/products` | Crear producto |
+| `GET` | `/api/v1/products?page=0&size=10` | Listar con paginación |
+| `GET` | `/api/v1/products/{id}` | Buscar por ID |
+| `PUT` | `/api/v1/products/{id}` | Actualizar |
+| `DELETE` | `/api/v1/products/{id}` | Eliminar |
+| `GET` | `/api/v1/products/sku/{sku}` | Buscar por SKU |
+| `GET` | `/api/v1/products/search?prefix=lap` | Buscar por prefijo de nombre |
+
+### Health
+
+| Método | Endpoint | Descripción |
+|---|---|---|
+| `GET` | `/api/v1/q/health` | Estado general |
+| `GET` | `/api/v1/q/health/live` | Liveness (usado por K8s) |
+| `GET` | `/api/v1/q/health/ready` | Readiness (usado por K8s) |
+
+### Formato de respuesta
 
 ```json
 {
-  "sku": "SKU-001",
+  "code": 200,
+  "description": "Information obtained successfully",
+  "data": { }
+}
+```
+
+### Modelo de producto
+
+```json
+{
+  "sku": "LAP-001",
   "name": "Laptop Pro",
   "description": "Equipo portátil de alto rendimiento",
   "category": "Tecnología",
@@ -75,142 +159,62 @@ product-management/
 
 ---
 
-# Arquitectura Backend
+## Colección Postman
 
-```text
-product-management-api/src/main/java/com/products
-├── adapters
-│   ├── in/rest
-│   └── out/persistence
-├── application
-│   ├── dto
-│   ├── mapper
-│   └── usecase
-├── domain
-│   └── model
-├── exception
-├── health
-└── validation
-```
+Importar `product-management.postman_collection.json` desde la raíz del repositorio. El request de creación captura automáticamente el `id` para usarlo en las peticiones siguientes.
 
 ---
 
-# Configuración Local
-
-## Backend (`product-management-api/.env`)
-
-```env
-APP_ENVIRONMENT=local
-PORT=8080
-
-MONGODB_CONNECTION_STRING=mongodb://localhost:27017
-MONGODB_DATABASE=products
-
-REDIS_URL=redis://localhost:6379
-```
-
----
-
-# Ejecutar Proyecto
-
-## 1. Backend
+## Docker
 
 ```bash
+# Backend
 cd product-management-api
-./gradlew quarkusDev
-```
+./gradlew build -x test
+docker build -t product-api .
 
-Disponible en:
-
-```text
-http://localhost:8080
-```
-
----
-
-## 2. Frontend
-
-```bash
+# Frontend
 cd product-management-web
-npm install
-npm run dev
+docker build -t product-web .
 ```
 
 ---
 
-# Compilar Backend
+## CI/CD (GitHub Actions)
+
+| Workflow | Trigger | Jobs |
+|---|---|---|
+| `docker-publish.yml` | Push a `main` en `product-management-api/**` | test → build → push `ghcr.io/apchavez/product-api:<sha>` |
+| `docker-publish-web.yml` | Push a `main` en `product-management-web/**` | type-check + build → push `ghcr.io/apchavez/product-web:<sha>` |
+
+---
+
+## Kubernetes
+
+Los manifests están en `k8s/`. Aplicar en orden:
 
 ```bash
-cd product-management-api
-./gradlew build
+kubectl apply -f k8s/issuer.yaml
+kubectl apply -f k8s/mongo.yaml
+kubectl apply -f k8s/secret.yaml       # completar credenciales primero
+kubectl apply -f k8s/configmap.yaml
+kubectl apply -f k8s/deployment.yaml
+kubectl apply -f k8s/service.yaml
+kubectl apply -f k8s/web-deployment.yaml
+kubectl apply -f k8s/web-service.yaml
+kubectl apply -f k8s/ingress.yaml
 ```
 
----
+El Ingress expone todo bajo `product.local`:
 
-# Endpoints Principales
-
-| Método | Endpoint                              |
-| ------ | ------------------------------------- |
-| POST   | /api/v1/products                      |
-| GET    | /api/v1/products                      |
-| GET    | /api/v1/products/{id}                 |
-| PUT    | /api/v1/products/{id}                 |
-| DELETE | /api/v1/products/{id}                 |
-| GET    | /api/v1/products/sku/{sku}            |
-| GET    | /api/v1/products/search?prefix=laptop |
-
----
-
-# Health Checks
-
-| Método | Endpoint               |
-| ------ | ---------------------- |
-| GET    | /api/v1/q/health       |
-| GET    | /api/v1/q/health/live  |
-| GET    | /api/v1/q/health/ready |
-
----
-
-# Colección Postman
-
-Archivo incluido en la raíz del proyecto:
-
-```text
-postman_collection.json
+```
+product.local/          →  product-web  (React SPA)
+product.local/api/v1    →  product-api  (Quarkus REST)
 ```
 
-Importar en Postman para probar endpoints rápidamente.
-
----
-
-# Objetivo Técnico del Proyecto
-
-Este proyecto fue construido para demostrar experiencia práctica en:
-
-- Desarrollo backend con Java
-- APIs REST profesionales
-- Quarkus Framework
-- Persistencia NoSQL con MongoDB
-- Integración de frontend con backend
-- Arquitectura limpia y mantenible
-- Validaciones robustas
-- Manejo profesional de errores
-- Organización real de repositorio fullstack
-
----
-
-# Estado del Proyecto
-
-Proyecto funcional y en mejora continua como parte de portafolio profesional.
-
----
-
-# Autor
-
-Desarrollado como proyecto personal de crecimiento técnico y showcase profesional.
-
----
-
-# Licencia
-
-Uso educativo y demostrativo.
+> Para el secret de MongoDB crear manualmente:
+> ```bash
+> kubectl create secret generic mongo-secret \
+>   --from-literal=MONGO_USERNAME=<user> \
+>   --from-literal=MONGO_PASSWORD=<password>
+> ```

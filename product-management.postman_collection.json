@@ -16,17 +16,31 @@
   "item": [
     {
       "name": "01 - Create Product",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "const json = pm.response.json();",
+              "if (json.data && json.data.id) {",
+              "    pm.collectionVariables.set('id', json.data.id);",
+              "    console.log('id captured:', json.data.id);",
+              "}",
+              "pm.test('Status 201', () => pm.response.to.have.status(201));",
+              "pm.test('id returned', () => pm.expect(json.data.id).to.be.a('string').and.match(/^[a-f0-9]{24}$/));"
+            ],
+            "type": "text/javascript"
+          }
+        }
+      ],
       "request": {
         "method": "POST",
         "header": [
-          {
-            "key": "Content-Type",
-            "value": "application/json"
-          }
+          { "key": "Content-Type", "value": "application/json" }
         ],
         "body": {
           "mode": "raw",
-          "raw": "{\n  \"sku\": \"SKU-001\",\n  \"name\": \"Laptop Pro\",\n  \"description\": \"High performance laptop\",\n  \"category\": \"Technology\",\n  \"price\": 14999.99,\n  \"stock\": 10,\n  \"active\": true\n}"
+          "raw": "{\n  \"sku\": \"LAP-001\",\n  \"name\": \"Laptop Pro\",\n  \"description\": \"High performance laptop\",\n  \"category\": \"Technology\",\n  \"price\": 14999.99,\n  \"stock\": 10,\n  \"active\": true\n}"
         },
         "url": {
           "raw": "{{url}}/api/v1/products",
@@ -37,6 +51,21 @@
     },
     {
       "name": "02 - Find All Products",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test('Status 200', () => pm.response.to.have.status(200));",
+              "pm.test('Has products array', () => {",
+              "    const json = pm.response.json();",
+              "    pm.expect(json.data.products).to.be.an('array');",
+              "});"
+            ],
+            "type": "text/javascript"
+          }
+        }
+      ],
       "request": {
         "method": "GET",
         "url": {
@@ -52,6 +81,21 @@
     },
     {
       "name": "03 - Find Product By ID",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test('Status 200', () => pm.response.to.have.status(200));",
+              "pm.test('SKU matches', () => {",
+              "    const json = pm.response.json();",
+              "    pm.expect(json.data.sku).to.equal('LAP-001');",
+              "});"
+            ],
+            "type": "text/javascript"
+          }
+        }
+      ],
       "request": {
         "method": "GET",
         "url": {
@@ -63,17 +107,29 @@
     },
     {
       "name": "04 - Update Product",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test('Status 200', () => pm.response.to.have.status(200));",
+              "pm.test('Updated message', () => {",
+              "    const json = pm.response.json();",
+              "    pm.expect(json.description).to.include('updated');",
+              "});"
+            ],
+            "type": "text/javascript"
+          }
+        }
+      ],
       "request": {
         "method": "PUT",
         "header": [
-          {
-            "key": "Content-Type",
-            "value": "application/json"
-          }
+          { "key": "Content-Type", "value": "application/json" }
         ],
         "body": {
           "mode": "raw",
-          "raw": "{\n  \"sku\": \"SKU-001\",\n  \"name\": \"Laptop Pro Updated\",\n  \"description\": \"Updated version\",\n  \"category\": \"Technology\",\n  \"price\": 15999.99,\n  \"stock\": 15,\n  \"active\": true\n}"
+          "raw": "{\n  \"sku\": \"LAP-001\",\n  \"name\": \"Laptop Pro Max\",\n  \"description\": \"Updated high performance laptop\",\n  \"category\": \"Technology\",\n  \"price\": 17999.99,\n  \"stock\": 5,\n  \"active\": true\n}"
         },
         "url": {
           "raw": "{{url}}/api/v1/products/{{id}}",
@@ -84,6 +140,18 @@
     },
     {
       "name": "05 - Delete Product",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test('Status 200', () => pm.response.to.have.status(200));",
+              "pm.collectionVariables.set('id', '');"
+            ],
+            "type": "text/javascript"
+          }
+        }
+      ],
       "request": {
         "method": "DELETE",
         "url": {
@@ -95,40 +163,127 @@
     },
     {
       "name": "06 - Find By SKU",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test('Status 200', () => pm.response.to.have.status(200));",
+              "pm.test('SKU matches', () => {",
+              "    pm.expect(pm.response.json().data.sku).to.equal('LAP-001');",
+              "});"
+            ],
+            "type": "text/javascript"
+          }
+        }
+      ],
       "request": {
         "method": "GET",
         "url": {
-          "raw": "{{url}}/api/v1/products/sku/SKU-001",
+          "raw": "{{url}}/api/v1/products/sku/LAP-001",
           "host": ["{{url}}"],
-          "path": ["api", "v1", "products", "sku", "SKU-001"]
+          "path": ["api", "v1", "products", "sku", "LAP-001"]
         }
       }
     },
     {
-      "name": "07 - Search By Prefix",
+      "name": "07 - Search By Name Prefix",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test('Status 200', () => pm.response.to.have.status(200));",
+              "pm.test('Returns array', () => {",
+              "    pm.expect(pm.response.json().data).to.be.an('array');",
+              "});"
+            ],
+            "type": "text/javascript"
+          }
+        }
+      ],
       "request": {
         "method": "GET",
         "url": {
           "raw": "{{url}}/api/v1/products/search?prefix=Lap",
           "host": ["{{url}}"],
           "path": ["api", "v1", "products", "search"],
-          "query": [
-            {
-              "key": "prefix",
-              "value": "Lap"
-            }
-          ]
+          "query": [{ "key": "prefix", "value": "Lap" }]
         }
       }
     },
     {
-      "name": "08 - Health Check",
+      "name": "08 - Health (Full)",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test('Status 200', () => pm.response.to.have.status(200));",
+              "pm.test('Status UP', () => {",
+              "    pm.expect(pm.response.json().status).to.equal('UP');",
+              "});"
+            ],
+            "type": "text/javascript"
+          }
+        }
+      ],
       "request": {
         "method": "GET",
         "url": {
           "raw": "{{url}}/api/v1/q/health",
           "host": ["{{url}}"],
           "path": ["api", "v1", "q", "health"]
+        }
+      }
+    },
+    {
+      "name": "09 - Health (Liveness)",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test('Status 200', () => pm.response.to.have.status(200));",
+              "pm.test('Status UP', () => {",
+              "    pm.expect(pm.response.json().status).to.equal('UP');",
+              "});"
+            ],
+            "type": "text/javascript"
+          }
+        }
+      ],
+      "request": {
+        "method": "GET",
+        "url": {
+          "raw": "{{url}}/api/v1/q/health/live",
+          "host": ["{{url}}"],
+          "path": ["api", "v1", "q", "health", "live"]
+        }
+      }
+    },
+    {
+      "name": "10 - Health (Readiness)",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test('Status 200', () => pm.response.to.have.status(200));",
+              "pm.test('Status UP', () => {",
+              "    pm.expect(pm.response.json().status).to.equal('UP');",
+              "});"
+            ],
+            "type": "text/javascript"
+          }
+        }
+      ],
+      "request": {
+        "method": "GET",
+        "url": {
+          "raw": "{{url}}/api/v1/q/health/ready",
+          "host": ["{{url}}"],
+          "path": ["api", "v1", "q", "health", "ready"]
         }
       }
     }
