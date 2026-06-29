@@ -1,5 +1,4 @@
-[![Backend CI](https://github.com/apchavez/quarkus-react-fullstack-k8s/actions/workflows/docker-publish.yml/badge.svg)](https://github.com/apchavez/quarkus-react-fullstack-k8s/actions/workflows/docker-publish.yml)
-[![Frontend CI](https://github.com/apchavez/quarkus-react-fullstack-k8s/actions/workflows/docker-publish-web.yml/badge.svg)](https://github.com/apchavez/quarkus-react-fullstack-k8s/actions/workflows/docker-publish-web.yml)
+[![CI](https://github.com/apchavez/quarkus-react-fullstack-k8s/actions/workflows/ci.yml/badge.svg)](https://github.com/apchavez/quarkus-react-fullstack-k8s/actions/workflows/ci.yml)
 
 # Product Management Platform
 
