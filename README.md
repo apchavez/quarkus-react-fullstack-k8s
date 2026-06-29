@@ -90,6 +90,24 @@ Add `product.local` to `/etc/hosts` pointing to your Ingress controller IP, then
 
 ---
 
+## Testing
+
+```bash
+# Backend
+cd product-management-api
+./gradlew test
+
+# Frontend
+cd product-management-web
+npm test
+```
+
+Both services have independent test suites. The backend covers use cases, persistence adapters, and REST endpoints. All tests run locally without Docker or external services.
+
+See [`product-management-api/README.md`](product-management-api/README.md) for full coverage details and test descriptions.
+
+---
+
 ## CI/CD
 
 GitHub Actions builds and publishes Docker images to GHCR on every push to `main`:
