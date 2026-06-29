@@ -156,3 +156,8 @@ See [`product-management-api/README.md`](product-management-api/README.md) for c
 |---|---|
 | [spring-webflux-hexagonal-arch](https://github.com/apchavez/spring-webflux-hexagonal-arch) | Java 21 reactive REST API with Spring Boot WebFlux, hexagonal architecture, PostgreSQL, and Kubernetes deployment |
 | [clean-arch-azure-functions-java](https://github.com/apchavez/clean-arch-azure-functions-java) | Java 21 serverless platform on Azure Functions with Clean Architecture |
+---
+
+## License
+
+[MIT](LICENSE)
