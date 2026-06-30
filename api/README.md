@@ -181,6 +181,64 @@ Coverage verificado con JaCoCo: mínimo ≥ 80% de líneas (LINE). Cobertura act
 
 ---
 
+## Observabilidad
+
+### Métricas
+
+Extension `quarkus-micrometer-registry-prometheus`. Endpoint en formato Prometheus:
+
+```
+GET /api/v1/q/metrics
+```
+
+Las métricas HTTP (`http_server_requests_seconds_*`) incluyen labels `method`, `outcome`, `status` y `uri`. El K8s `deployment.yaml` ya tiene las annotations `prometheus.io/scrape`, `prometheus.io/path` y `prometheus.io/port` para autodescubrimiento.
+
+### Trazas distribuidas
+
+Extension `quarkus-opentelemetry`. Las trazas se exportan via OTLP gRPC al colector configurado en:
+
+```env
+OTEL_EXPORTER_OTLP_ENDPOINT=http://otel-collector:4317   # valor en k8s/configmap.yaml
+```
+
+En local el default es `http://localhost:4317`. Quarkus auto-instrumenta todas las llamadas REST, MongoDB y Redis.
+
+### Health checks
+
+SmallRye Health (`quarkus-smallrye-health`):
+
+| Endpoint | Tipo | Descripción |
+|---|---|---|
+| `/api/v1/q/health` | Combined | Estado general |
+| `/api/v1/q/health/live` | `@Liveness` | App activa (K8s livenessProbe) |
+| `/api/v1/q/health/ready` | `@Readiness` | Ping real a MongoDB y Redis con timeout 2s (K8s readinessProbe) |
+
+### Logging
+
+JBoss LogManager con configuración en `application.properties`:
+
+```properties
+quarkus.log.level=INFO
+quarkus.log.category."com.products".level=DEBUG
+```
+
+Los logs van a stdout y son capturados por el runtime de K8s / Docker.
+
+### Alertas K8s
+
+`k8s/prometheus-rule.yaml` define un `PrometheusRule` (requiere [Prometheus Operator](https://prometheus-operator.dev)) con tres alertas: `HighErrorRate` (crítico, >5% 5xx), `HighP99Latency` (warning, P99 >1s) y `PodNotReady` (crítico).
+
+### Grafana
+
+`k8s/grafana.yaml` despliega Grafana 11.1 con datasource Prometheus y dashboard pre-provisionado (request rate, error rate, P50/P99 latency, JVM memory).
+
+```bash
+kubectl port-forward svc/grafana 3000:3000
+# Abrir http://localhost:3000 (acceso anónimo en modo Viewer)
+```
+
+---
+
 ## OpenAPI / Swagger UI
 
 Con el proyecto corriendo, disponible en:
@@ -261,6 +319,8 @@ kubectl apply -f k8s/service.yaml
 kubectl apply -f k8s/web-deployment.yaml
 kubectl apply -f k8s/web-service.yaml
 kubectl apply -f k8s/ingress.yaml
+kubectl apply -f k8s/prometheus-rule.yaml   # requiere Prometheus Operator
+kubectl apply -f k8s/grafana.yaml
 ```
 
 El Ingress expone todo bajo `product.local`:

@@ -291,6 +291,32 @@
           "path": ["api", "v1", "q", "health", "ready"]
         }
       }
+    },
+    {
+      "name": "11 - Metrics (Prometheus)",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test('Status 200', () => pm.response.to.have.status(200));",
+              "pm.test('Content-Type is text/plain', () => {",
+              "    pm.expect(pm.response.headers.get('Content-Type')).to.include('text/plain');",
+              "});"
+            ],
+            "type": "text/javascript"
+          }
+        }
+      ],
+      "request": {
+        "method": "GET",
+        "description": "Prometheus metrics endpoint (text/plain). Scrapeado automáticamente por Prometheus via annotations en el pod.",
+        "url": {
+          "raw": "{{baseUrl}}/api/v1/q/metrics",
+          "host": ["{{baseUrl}}"],
+          "path": ["api", "v1", "q", "metrics"]
+        }
+      }
     }
   ]
 }

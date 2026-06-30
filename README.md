@@ -57,14 +57,16 @@ product-management/
 ├── k8s/                            Kubernetes manifests (full stack)
 │   ├── issuer.yaml
 │   ├── secret.yaml
-│   ├── configmap.yaml
+│   ├── configmap.yaml              Env vars incl. OTEL_EXPORTER_OTLP_ENDPOINT
 │   ├── mongo.yaml
 │   ├── redis.yaml
-│   ├── deployment.yaml
+│   ├── deployment.yaml             Prometheus scrape annotations included
 │   ├── service.yaml
 │   ├── web-deployment.yaml
 │   ├── web-service.yaml
-│   └── ingress.yaml
+│   ├── ingress.yaml
+│   ├── prometheus-rule.yaml        PrometheusRule CRD — alert rules
+│   └── grafana.yaml                Grafana 11.1 deployment + pre-provisioned dashboard
 ├── docker/
 │   └── gateway.conf                nginx gateway (Docker Compose)
 ├── postman/
@@ -168,7 +170,7 @@ The `postman/` folder contains the collection and two environments.
 
 | File | Description |
 |---|---|
-| `quarkus-react-fullstack-k8s.postman_collection.json` | Main collection (10 requests) |
+| `quarkus-react-fullstack-k8s.postman_collection.json` | Main collection (11 requests) |
 | `quarkus-react-fullstack-k8s.local.postman_environment.json` | Local environment via Docker Compose |
 | `quarkus-react-fullstack-k8s.k8s.postman_environment.json` | Kubernetes environment (`product.local`) |
 
@@ -185,6 +187,7 @@ Import all three files into Postman, select the appropriate environment, and run
 - Complete Kubernetes manifests: ConfigMap, Secret, Deployments, Services, Ingress
 - Multi-stage Docker builds for both backend and frontend
 - Independent CI/CD pipelines per service (backend and frontend published separately to GHCR)
+- Full observability stack: Prometheus metrics, OpenTelemetry tracing, SmallRye health checks, PrometheusRule alerts, and Grafana dashboard
 
 ---
 
