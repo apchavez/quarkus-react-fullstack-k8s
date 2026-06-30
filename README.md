@@ -150,6 +150,16 @@ GitHub Actions runs tests and publishes Docker images to GHCR:
 | `HighP99Latency` | P99 latency >1s for 2 min | warning |
 | `PodNotReady` | Any pod not ready for 2 min | critical |
 
+### Grafana
+
+`k8s/grafana.yaml` deploys Grafana 11.1 with a pre-provisioned Prometheus datasource and a dashboard covering request rate, error rate, P50/P99 latency, and JVM memory. Access it locally with:
+
+```bash
+kubectl port-forward svc/grafana 3000:3000
+```
+
+Then open `http://localhost:3000` (anonymous viewer access, no login required).
+
 ---
 
 ## Postman
