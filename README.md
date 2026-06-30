@@ -121,12 +121,13 @@ See [`api/README.md`](api/README.md) for full coverage details and test descript
 
 ## CI/CD
 
-GitHub Actions builds and publishes Docker images to GHCR on every push to `main`:
+GitHub Actions runs tests and publishes Docker images to GHCR:
 
-| Workflow | Publishes |
-|---|---|
-| `docker-publish.yml` | `ghcr.io/apchavez/quarkus-react-fullstack-k8s-api` |
-| `docker-publish-web.yml` | `ghcr.io/apchavez/quarkus-react-fullstack-k8s-web` |
+| Workflow | Trigger | What it does |
+|---|---|---|
+| `ci.yml` | Every push / PR to `main` | Backend tests + JaCoCo coverage gate; frontend typecheck, tests, and coverage; SonarCloud (on main) |
+| `docker-publish.yml` | Push / PR to `main` (`api/**`) | Backend tests + coverage, then builds and pushes `ghcr.io/apchavez/product-api` |
+| `docker-publish-web.yml` | Push / PR to `main` (`web/**`) | Frontend typecheck, tests, coverage, build, then pushes `ghcr.io/apchavez/product-web` |
 
 ---
 
