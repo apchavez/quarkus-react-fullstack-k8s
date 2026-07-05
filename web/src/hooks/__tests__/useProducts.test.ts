@@ -54,6 +54,22 @@ describe('useProducts — carga inicial', () => {
     );
     expect(result.current.products).toHaveLength(0);
   });
+
+  it('usa valores por defecto cuando content/totalPages vienen ausentes en la respuesta', async () => {
+    vi.mocked(api.getProducts).mockResolvedValueOnce({
+      content: undefined,
+      totalPages: undefined,
+      totalElements: 0,
+      number: 0,
+      size: 10,
+    } as unknown as Awaited<ReturnType<typeof api.getProducts>>);
+
+    const { result } = renderHook(() => useProducts());
+
+    await waitFor(() => expect(api.getProducts).toHaveBeenCalled());
+    expect(result.current.products).toEqual([]);
+    expect(result.current.totalPages).toBe(1);
+  });
 });
 
 describe('useProducts — handleSubmit (crear)', () => {
@@ -86,6 +102,18 @@ describe('useProducts — handleSubmit (crear)', () => {
     });
 
     expect(result.current.message).toBe('Error al crear producto');
+  });
+
+  it('usa el mensaje de error genérico cuando el rechazo no es un Error', async () => {
+    vi.mocked(api.createProduct).mockRejectedValueOnce('network down');
+    const { result } = renderHook(() => useProducts());
+    await waitFor(() => expect(result.current.products).toHaveLength(1));
+
+    await act(async () => {
+      await result.current.handleSubmit({ ...mockProduct, id: undefined });
+    });
+
+    expect(result.current.message).toBe('Error guardando producto');
   });
 });
 
@@ -147,6 +175,18 @@ describe('useProducts — handleDelete', () => {
     });
 
     expect(result.current.message).toBe('Error al eliminar producto');
+  });
+
+  it('usa el mensaje de error genérico cuando el rechazo no es un Error', async () => {
+    vi.mocked(api.deleteProduct).mockRejectedValueOnce('network down');
+    const { result } = renderHook(() => useProducts());
+    await waitFor(() => expect(result.current.products).toHaveLength(1));
+
+    await act(async () => {
+      await result.current.handleDelete('aabbccddeeff001122334455');
+    });
+
+    expect(result.current.message).toBe('Error eliminando producto');
   });
 });
 
