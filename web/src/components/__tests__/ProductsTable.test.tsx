@@ -44,16 +44,12 @@ describe('ProductsTable — lista vacía', () => {
 });
 
 describe('ProductsTable — renderizado de productos', () => {
-  it('muestra una fila por cada producto', () => {
+  it('muestra una fila por cada producto, incluyendo Sí / No para el campo activo', () => {
     renderTable();
     expect(screen.getByText('SKU-001')).toBeInTheDocument();
     expect(screen.getByText('SKU-002')).toBeInTheDocument();
     expect(screen.getByText('Laptop Pro')).toBeInTheDocument();
     expect(screen.getByText('Mouse Inalámbrico')).toBeInTheDocument();
-  });
-
-  it('muestra Sí / No para el campo activo', () => {
-    renderTable();
     expect(screen.getByText('Sí')).toBeInTheDocument();
     expect(screen.getByText('No')).toBeInTheDocument();
   });

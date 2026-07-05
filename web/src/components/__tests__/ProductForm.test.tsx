@@ -28,6 +28,12 @@ function renderForm(initialData?: Product | null) {
   );
 }
 
+function fillValidBase() {
+  fireEvent.change(screen.getByLabelText('SKU'), { target: { value: 'SKU-001' } });
+  fireEvent.change(screen.getByLabelText('Nombre'), { target: { value: 'Laptop Pro' } });
+  fireEvent.change(screen.getByLabelText('Categoría'), { target: { value: 'Technology' } });
+}
+
 beforeEach(() => {
   onSubmit.mockClear();
   onCancelEdit.mockClear();
@@ -92,9 +98,7 @@ describe('ProductForm — validación de formato', () => {
 
   it('muestra error de formato para descripción con caracteres inválidos', async () => {
     renderForm();
-    fireEvent.change(screen.getByLabelText('SKU'), { target: { value: 'SKU-001' } });
-    fireEvent.change(screen.getByLabelText('Nombre'), { target: { value: 'Laptop Pro' } });
-    fireEvent.change(screen.getByLabelText('Categoría'), { target: { value: 'Technology' } });
+    fillValidBase();
     fireEvent.change(screen.getByLabelText('Descripción'), {
       target: { value: 'Invalid@Description#2024' },
     });
@@ -109,8 +113,7 @@ describe('ProductForm — validación de formato', () => {
 
   it('muestra error de formato para categoría con caracteres inválidos', async () => {
     renderForm();
-    fireEvent.change(screen.getByLabelText('SKU'), { target: { value: 'SKU-001' } });
-    fireEvent.change(screen.getByLabelText('Nombre'), { target: { value: 'Laptop Pro' } });
+    fillValidBase();
     fireEvent.change(screen.getByLabelText('Categoría'), {
       target: { value: 'Invalid@Category#2024' },
     });
@@ -125,9 +128,7 @@ describe('ProductForm — validación de formato', () => {
 
   it('no muestra error de descripción cuando está vacía (campo opcional)', async () => {
     renderForm();
-    fireEvent.change(screen.getByLabelText('SKU'), { target: { value: 'SKU-001' } });
-    fireEvent.change(screen.getByLabelText('Nombre'), { target: { value: 'Laptop Pro' } });
-    fireEvent.change(screen.getByLabelText('Categoría'), { target: { value: 'Technology' } });
+    fillValidBase();
 
     await userEvent.click(screen.getByRole('button', { name: 'Crear' }));
 
@@ -139,16 +140,7 @@ describe('ProductForm — validación de formato', () => {
 describe('ProductForm — envío exitoso', () => {
   it('llama onSubmit cuando el formulario es válido', async () => {
     renderForm();
-
-    fireEvent.change(screen.getByLabelText('SKU'), {
-      target: { value: 'SKU-001' },
-    });
-    fireEvent.change(screen.getByLabelText('Nombre'), {
-      target: { value: 'Laptop Pro' },
-    });
-    fireEvent.change(screen.getByLabelText('Categoría'), {
-      target: { value: 'Technology' },
-    });
+    fillValidBase();
 
     await userEvent.click(screen.getByRole('button', { name: 'Crear' }));
 
@@ -167,9 +159,7 @@ describe('ProductForm — envío exitoso', () => {
 describe('ProductForm — validación de precio y stock', () => {
   it('muestra error cuando el precio es negativo', () => {
     const { container } = renderForm();
-    fireEvent.change(screen.getByLabelText('SKU'), { target: { value: 'SKU-001' } });
-    fireEvent.change(screen.getByLabelText('Nombre'), { target: { value: 'Laptop Pro' } });
-    fireEvent.change(screen.getByLabelText('Categoría'), { target: { value: 'Technology' } });
+    fillValidBase();
     fireEvent.change(screen.getByLabelText('Precio'), { target: { value: '-10' } });
 
     // Dispatched directly on the form: a real click on the submit button would be
@@ -194,9 +184,7 @@ describe('ProductForm — validación de precio y stock', () => {
 
   it('muestra error cuando el stock es negativo', () => {
     const { container } = renderForm();
-    fireEvent.change(screen.getByLabelText('SKU'), { target: { value: 'SKU-001' } });
-    fireEvent.change(screen.getByLabelText('Nombre'), { target: { value: 'Laptop Pro' } });
-    fireEvent.change(screen.getByLabelText('Categoría'), { target: { value: 'Technology' } });
+    fillValidBase();
     fireEvent.change(screen.getByLabelText('Stock'), { target: { value: '-3' } });
 
     // Same reasoning as the negative-price case: the Stock input carries min=0, so a

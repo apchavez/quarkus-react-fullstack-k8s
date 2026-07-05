@@ -23,6 +23,25 @@ afterEach(() => {
   vi.restoreAllMocks();
 });
 
+async function renderAndLogin() {
+  vi.spyOn(authApi, 'login').mockResolvedValue({
+    token: 'jwt-token',
+    tokenType: 'Bearer',
+    expiresIn: 3600,
+    username: 'admin',
+    roles: ['ADMIN'],
+  });
+
+  render(
+    <AuthProvider>
+      <Consumer />
+    </AuthProvider>
+  );
+
+  fireEvent.click(screen.getByText('login'));
+  await waitFor(() => expect(screen.getByTestId('status').textContent).toBe('in'));
+}
+
 describe('AuthProvider / useAuth', () => {
   it('starts unauthenticated when no token is stored', () => {
     render(
@@ -35,43 +54,12 @@ describe('AuthProvider / useAuth', () => {
   });
 
   it('becomes authenticated after a successful login', async () => {
-    vi.spyOn(authApi, 'login').mockResolvedValue({
-      token: 'jwt-token',
-      tokenType: 'Bearer',
-      expiresIn: 3600,
-      username: 'admin',
-      roles: ['ADMIN'],
-    });
-
-    render(
-      <AuthProvider>
-        <Consumer />
-      </AuthProvider>
-    );
-
-    fireEvent.click(screen.getByText('login'));
-
-    await waitFor(() => expect(screen.getByTestId('status').textContent).toBe('in'));
+    await renderAndLogin();
     expect(screen.getByTestId('username').textContent).toBe('admin');
   });
 
   it('clears state on logout', async () => {
-    vi.spyOn(authApi, 'login').mockResolvedValue({
-      token: 'jwt-token',
-      tokenType: 'Bearer',
-      expiresIn: 3600,
-      username: 'admin',
-      roles: ['ADMIN'],
-    });
-
-    render(
-      <AuthProvider>
-        <Consumer />
-      </AuthProvider>
-    );
-
-    fireEvent.click(screen.getByText('login'));
-    await waitFor(() => expect(screen.getByTestId('status').textContent).toBe('in'));
+    await renderAndLogin();
 
     fireEvent.click(screen.getByText('logout'));
     expect(screen.getByTestId('status').textContent).toBe('out');
