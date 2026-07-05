@@ -76,6 +76,14 @@ jacoco {
 
 tasks.named('jacocoTestReport') {
     dependsOn tasks.named('test')
+    // Quarkus's own jacoco extension (needed to capture coverage for classes
+    // exercised through @QuarkusTest, which run in Quarkus's own augmented
+    // classloader and are invisible to the plain Gradle/JVM jacoco agent)
+    // writes its execution data to build/jacoco-quarkus.exec, separate from
+    // the standard build/jacoco/test.exec. Without merging both files here,
+    // the XML report (and therefore Sonar) silently reports 0% coverage for
+    // every class only ever touched inside a @QuarkusTest.
+    executionData fileTree(layout.buildDirectory).include('jacoco/test.exec', 'jacoco-quarkus.exec')
     reports {
         xml.required = true
         html.required = true
