@@ -70,8 +70,7 @@ product-management/
 │   ├── quarkus-react.local.postman_environment.json
 │   └── quarkus-react.k8s.postman_environment.json
 ├── .github/workflows/
-│   ├── docker-publish.yml          CI/CD del backend
-│   └── docker-publish-web.yml      CI/CD del frontend
+│   └── ci.yml                      Tests + build y publicación de imágenes Docker (backend y frontend)
 ├── docker-compose.yml
 └── README.md
 ```
@@ -132,9 +131,7 @@ GitHub Actions corre los tests, publica imágenes Docker en GHCR, y despliega en
 
 | Workflow | Trigger | Qué hace |
 |---|---|---|
-| `ci.yml` | Cada push / PR a `main` | Tests del backend + gate de cobertura JaCoCo; typecheck, tests y cobertura del frontend; E2E con Playwright; fmt/validate de Terraform; SonarCloud (en main) |
-| `docker-publish.yml` | Push / PR a `main` (`api/**`) | Tests + cobertura del backend → construye y publica `ghcr.io/apchavez/product-api:latest` y `:sha-<SHA>` |
-| `docker-publish-web.yml` | Push / PR a `main` (`web/**`) | Typecheck, tests y cobertura del frontend → construye y publica `ghcr.io/apchavez/product-web:latest` y `:sha-<SHA>` |
+| `ci.yml` | Cada push / PR a `main` | Tests del backend + gate de cobertura JaCoCo; typecheck, tests y cobertura del frontend; E2E con Playwright; fmt/validate de Terraform; SonarCloud (en main); (solo push a `main`) construye y publica `ghcr.io/apchavez/product-api:latest`/`:sha-<SHA>` y `ghcr.io/apchavez/product-web:latest`/`:sha-<SHA>` |
 | `deploy.yml` | Manual (`workflow_dispatch`) | `helm upgrade --install product-management ./chart --set api.image.tag=latest --set web.image.tag=latest` → verifica el rollout de `product-api` y `product-web` |
 | `destroy.yml` | Manual (`workflow_dispatch`) | Elimina el namespace `product-management` y todos sus recursos |
 | `k6.yml` | Manual (`workflow_dispatch`) | Corre `k6/product-api.js` contra `K6_BASE_URL` con el escenario elegido (`smoke`/`load`/`spike`) |

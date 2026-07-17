@@ -24,3 +24,8 @@ updates:
     directory: "/web"
     schedule:
       interval: weekly
+
+  - package-ecosystem: terraform
+    directory: "/terraform"
+    schedule:
+      interval: weekly

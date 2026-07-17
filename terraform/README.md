@@ -52,7 +52,7 @@ terraform destroy
 
 ## Lo que esto *no* hace
 
-- No construye ni publica imágenes Docker — eso lo hace `docker-publish.yml`/`docker-publish-web.yml`.
+- No construye ni publica imágenes Docker — eso lo hace `ci.yml` (jobs `docker-api`/`docker-web`).
 - No configura DNS para `product.local` — o editas `/etc/hosts` apuntando a la dirección del load balancer de `ingress-nginx` (`terraform output ingress_nginx_load_balancer_hint`), o usas un dominio real.
 - No gestiona el secreto `KUBECONFIG`/entorno `production` de GitHub Actions que usa `deploy.yml` — eso es un paso manual (salida de `aws eks update-kubeconfig`, codificada en base64) si quieres que CI despliegue en este clúster.
 

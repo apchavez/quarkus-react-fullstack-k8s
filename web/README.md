@@ -147,7 +147,7 @@ docker run -p 80:80 product-web
 
 ## CI/CD
 
-GitHub Actions (`.github/workflows/docker-publish-web.yml`):
+GitHub Actions (`.github/workflows/ci.yml`, job `frontend` + `docker-web`):
 
 1. `tsc --noEmit` — verificación de tipos
 2. `pnpm test` — suite de tests

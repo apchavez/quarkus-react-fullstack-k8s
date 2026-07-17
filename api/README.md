@@ -249,7 +249,7 @@ CSV de import — encabezado obligatorio: `sku,name,description,category,price,s
 
 La publicación es **fire-and-forget**: un fallo de Kafka (broker caído, timeout) se registra como warning pero nunca hace fallar la operación de negocio que lo originó — el mismo principio fail-open que ya aplica al caché de Redis. No hay ningún consumer en este repo; es solo el productor del evento (igual que en `spring-webflux-angular`, que publica al mismo tópico `product-events` de la misma forma: nadie lo consume ahí tampoco, es una demostración del patrón productor).
 
-En tests (`%test` profile) y en CI, el canal usa el conector `smallrye-in-memory` en vez de un broker Kafka real — no hay contenedor de Kafka en `docker-publish.yml`.
+En tests (`%test` profile) y en CI, el canal usa el conector `smallrye-in-memory` en vez de un broker Kafka real — no hay contenedor de Kafka en `ci.yml`.
 
 ## Rate limiting
 
@@ -374,14 +374,14 @@ docker build -t product-web .
 
 | Workflow | Trigger | Jobs |
 |---|---|---|
-| `docker-publish.yml` | Push y PR a `main` en `api/**` | test + coverage → (solo push) build → push `ghcr.io/apchavez/product-api:<sha>` |
-| `docker-publish-web.yml` | Push y PR a `main` en `web/**` | type-check → test → build → (solo push) push `ghcr.io/apchavez/product-web:<sha>` |
+| `ci.yml` (`docker-api`) | Push a `main` | test + coverage (job `backend`) → build → push `ghcr.io/apchavez/product-api:<sha>` |
+| `ci.yml` (`docker-web`) | Push a `main` | type-check → test → coverage (job `frontend`) → build → push `ghcr.io/apchavez/product-web:<sha>` |
 
 ---
 
 ## Kubernetes
 
-Los manifests reales están en `chart/` (Helm) en la raíz del repositorio — es lo mismo que aplica `deploy.yml` en CI, que despliega siempre el tag `:latest` publicado por `docker-publish.yml`/`docker-publish-web.yml` (sin archivos ancla ni commits automáticos de CI).
+Los manifests reales están en `chart/` (Helm) en la raíz del repositorio — es lo mismo que aplica `deploy.yml` en CI, que despliega siempre el tag `:latest` publicado por `ci.yml` (jobs `docker-api`/`docker-web`, sin archivos ancla ni commits automáticos de CI).
 
 > **Paso previo:** las credenciales de Mongo se pasan como `--set` al instalar el chart, no se crean por separado:
 > ```bash
